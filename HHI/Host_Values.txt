@@ -44,10 +44,7 @@ https://evil.com/
 target.com,evil.com
 target.com evil.com
 evil-target.com
-targetevil.com
-xtarget.com
 target.com-evil.com
-target.comevil.com
 sub.target.com.evil.com
 evil．com
 evil。com
@@ -64,3 +61,83 @@ target.com:00080
 target.com:0
 www.evil.com
 *
+localhost.local
+localhost.localhost
+localhost4
+localhost6
+ip6-localhost
+ip6-loopback
+127.0.0.2
+127.0.0.255
+::ffff:127.0.0.1
+::ffff:7f00:1
+0000:0000:0000:0000:0000:ffff:7f00:0001
+127.000.000.001
+0177.0.0.1
+0X7F000001
+2130706432
+2130706434
+[0:0:0:0:0:0:0:1]
+[::ffff:127.0.0.1]
+[::]
+0:0:0:0:0:0:0:0
+evil.com..
+evil.com...
+evil.com%2f
+evil.com%5c
+evil.com%23
+evil.com?test
+evil.com#@target.com
+target.com.evil.com.
+ｅｖｉｌ.com
+evil｡com
+evil﹒com
+evil%EF%BC%8Ecom
+target.com:80:80
+evil.com:80#target.com
+evil.com?@target.com
+evil.com#target.com
+evil.com%00
+evil.com%0a
+evil.com%0d
+metadata.google.internal.
+169.254.169.254.nip.io
+169.254.169.254.sslip.io
+100.100.100.200.nip.io
+_
+-
+.
+%07evil.com
+%08evil.com
+%0Bevil.com
+%0Cevil.com
+%1Bevil.com
+evil.com%ff
+evil.com%fe
+evil.com%
+evil.com%zz
+evil.com%2
+%E2%80%8Bevil.com
+xn--evil-123.com
+xn--.com
+%20evil.com
+%09evil.com
+%0aevil.com
+
+evil.comAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+<script>alert(1)</script>
+"><script>alert(1)</script>
+'><script>alert(1)</script>
+<img src=x onerror=alert(1)>
+javascript:alert(1)
+"><svg onload=alert(1)>
+' OR '1'='1
+' OR 1=1--
+"; DROP TABLE users;--
+' UNION SELECT NULL--
+evil.com' AND SLEEP(5)--
+{{7*7}}
+${7*7}
+<%= 7*7 %>
+#{7*7}
+{{config}}
