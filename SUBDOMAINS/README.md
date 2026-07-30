@@ -1,7 +1,6 @@
 # Subdomains.py
 
-Subdomain enumeration (crt.sh, subfinder, assetfinder, findomain, gau passively
-+ amass passively + DNS bruteforce/permutations via puredns/alterx),
+Subdomain enumeration (crt.sh, subfinder, assetfinder, findomain, gau passively, amass passively, DNS bruteforce/permutations via puredns/alterx),
 results merged, deduped, sorted, and DNS-validated into a clean output file.
 Meant to run in the background while you do something else.
 
