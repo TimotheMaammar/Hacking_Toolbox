@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 ECB cut-and-paste forgery.
 
