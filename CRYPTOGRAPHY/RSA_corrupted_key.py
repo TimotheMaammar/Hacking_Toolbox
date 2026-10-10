@@ -4,7 +4,7 @@ RSA Corrupted Private Key — Generic Solver
 Recovers p, q from a corrupted OpenSSL text dump (openssl rsa -text)
 where the HIGH bytes of privateExponent are zeroed but the LOW bytes intact.
 
-Usage: python3 solve.py private.dump secret.dat
+Usage: python3 solve.py private.dump secret.dat 
 """
 
 import re, math, sys
