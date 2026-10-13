@@ -1,0 +1,9 @@
+git clone https://github.com/jonaslejon/malicious-pdf
+
+cd .\malicious-pdf\
+pip install -r .\requirements.txt
+
+python .\malicious-pdf.py [IP VPS]
+
+cd output/
+ls
