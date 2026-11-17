@@ -4,3 +4,5 @@
 - https://github.com/ticarpi/jwt_tool (JWT)
 - https://github.com/ambionics/phpggc (Gadgets PHP)
 - https://github.com/testssl/testssl.sh (SSL)
+
+- https://amsi.fail (Anti-AMSI)
